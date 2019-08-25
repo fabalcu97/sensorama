@@ -1,6 +1,11 @@
 
 import { NativeModules } from 'react-native';
 
-const { RNSensorama } = NativeModules;
+const { ListSensors } = NativeModules;
 
-export default RNSensorama;
+export default ListSensors;
+
+export function getSensorList() {
+  return ListSensors.getSensorList()
+}
+
