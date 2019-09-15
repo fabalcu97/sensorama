@@ -15,38 +15,38 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-public class Gyroscope extends ReactContextBaseJavaModule implements SensorEventListener {
+public class Accelerometer extends ReactContextBaseJavaModule implements SensorEventListener {
 
     private final ReactApplicationContext reactContext;
     private final SensorManager sensorManager;
     private final Sensor sensor;
-    private double lastReading = (double) System.currentTimeMillis();
     private int interval;
 
-    public Gyroscope(ReactApplicationContext reactContext) {
+
+    public Accelerometer(ReactApplicationContext reactContext) {
         super(reactContext);
-        Log.d("Gyroscope", "Constructor");
         this.reactContext = reactContext;
         this.sensorManager = (SensorManager) reactContext.getSystemService(
                 ReactApplicationContext.SENSOR_SERVICE
         );
-        this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
     }
 
-    // RN Methods
+    @Override
+    public String getName() {
+        return "Accelerometer";
+    }
+
     @ReactMethod
     public void isAvailable(Promise promise) {
-        if (this.sensor == null) {
-            promise.reject(new RuntimeException("No Gyroscope found"));
-            return;
-        }
-        promise.resolve("Gyroscope available!");
+        promise.resolve(this.sensor != null);
     }
+
 
     @ReactMethod
     public void getData(Promise promise) {
         if (this.sensor == null) {
-            promise.reject(new RuntimeException("No Gyroscope found"));
+            promise.reject(new RuntimeException("No Accelerometer found"));
             return;
         }
         WritableMap map = Arguments.createMap();
@@ -58,6 +58,7 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
         promise.resolve(map);
     }
 
+
     @ReactMethod
     public void setUpdateInterval(int newInterval) {
         this.interval = newInterval;
@@ -66,7 +67,7 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
     @ReactMethod
     public void startUpdates() {
         // Milliseconds to Microseconds conversion
-        sensorManager.registerListener(this, sensor, this.interval * 1000);
+        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @ReactMethod
@@ -74,12 +75,6 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
         sensorManager.unregisterListener(this);
     }
 
-    @Override
-    public String getName() {
-        return "Gyroscope";
-    }
-
-    // SensorEventListener Interface
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         try {
             this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
@@ -89,26 +84,29 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
         }
     }
 
+
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        Log.d("Gyroscope", "onSensorChanged");
-        double tempMs = (double) System.currentTimeMillis();
-        if (tempMs - lastReading >= interval) {
-            lastReading = tempMs;
+    public void onSensorChanged(SensorEvent event) {
+        Sensor mySensor = event.sensor;
 
-            Sensor mySensor = sensorEvent.sensor;
-            WritableMap map = Arguments.createMap();
-
-            if (mySensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                map.putDouble("x", sensorEvent.values[0]);
-                map.putDouble("y", sensorEvent.values[1]);
-                map.putDouble("z", sensorEvent.values[2]);
-                sendEvent("Gyroscope", map);
-            }
+        if (mySensor.getType() != Sensor.TYPE_ACCELEROMETER) {
+            return;
         }
+
+        WritableMap map = Arguments.createMap();
+
+        map.putDouble("x", event.values[0]);
+        map.putDouble("y", event.values[1]);
+        map.putDouble("z", event.values[2]);
+        map.putDouble("timestamp", event.timestamp);
+        sendEvent("Accelerometer", map);
+
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
+
+
 }

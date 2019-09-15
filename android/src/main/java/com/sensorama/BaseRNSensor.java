@@ -15,17 +15,15 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-public class Gyroscope extends ReactContextBaseJavaModule implements SensorEventListener {
+public abstract class BaseRNSensor extends ReactContextBaseJavaModule implements SensorEventListener {
 
     private final ReactApplicationContext reactContext;
     private final SensorManager sensorManager;
     private final Sensor sensor;
-    private double lastReading = (double) System.currentTimeMillis();
     private int interval;
 
-    public Gyroscope(ReactApplicationContext reactContext) {
+    public BaseRNSensor(ReactApplicationContext reactContext) {
         super(reactContext);
-        Log.d("Gyroscope", "Constructor");
         this.reactContext = reactContext;
         this.sensorManager = (SensorManager) reactContext.getSystemService(
                 ReactApplicationContext.SENSOR_SERVICE
@@ -34,13 +32,10 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
     }
 
     // RN Methods
+
     @ReactMethod
     public void isAvailable(Promise promise) {
-        if (this.sensor == null) {
-            promise.reject(new RuntimeException("No Gyroscope found"));
-            return;
-        }
-        promise.resolve("Gyroscope available!");
+        promise.resolve(this.sensor != null);
     }
 
     @ReactMethod
@@ -74,11 +69,6 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
         sensorManager.unregisterListener(this);
     }
 
-    @Override
-    public String getName() {
-        return "Gyroscope";
-    }
-
     // SensorEventListener Interface
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         try {
@@ -89,26 +79,4 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
         }
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        Log.d("Gyroscope", "onSensorChanged");
-        double tempMs = (double) System.currentTimeMillis();
-        if (tempMs - lastReading >= interval) {
-            lastReading = tempMs;
-
-            Sensor mySensor = sensorEvent.sensor;
-            WritableMap map = Arguments.createMap();
-
-            if (mySensor.getType() == Sensor.TYPE_GYROSCOPE) {
-                map.putDouble("x", sensorEvent.values[0]);
-                map.putDouble("y", sensorEvent.values[1]);
-                map.putDouble("z", sensorEvent.values[2]);
-                sendEvent("Gyroscope", map);
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
 }
