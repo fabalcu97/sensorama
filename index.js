@@ -13,17 +13,17 @@ export function getSensorList() {
 }
 
 export let Gyroscope = {
-  isAvailable: Gyroscope.isAvailable,
-  getData: Gyroscope.getData,
-  setUpdateInterval: Gyroscope.setUpdateInterval,
-  startUpdates: Gyroscope.startUpdates,
-  stopUpdates: Gyroscope.stopUpdates,
+  isAvailable: GyroscopeSensor.isAvailable,
+  getData: GyroscopeSensor.getData,
+  setUpdateInterval: GyroscopeSensor.setUpdateInterval,
+  startUpdates: GyroscopeSensor.startUpdates,
+  stopUpdates: GyroscopeSensor.stopUpdates,
 };
 
 export let Proximity = {
-  isAvailable: Proximity.isAvailable,
-  getData: Proximity.getData,
-  setUpdateInterval: Proximity.setUpdateInterval,
-  startUpdates: Proximity.startUpdates,
-  stopUpdates: Proximity.stopUpdates,
+  isAvailable: ProximitySensor.isAvailable,
+  getData: ProximitySensor.getData,
+  setUpdateInterval: ProximitySensor.setUpdateInterval,
+  startUpdates: ProximitySensor.startUpdates,
+  stopUpdates: ProximitySensor.stopUpdates,
 };
