@@ -66,7 +66,6 @@ public class Light extends ReactContextBaseJavaModule implements SensorEventList
 
     @ReactMethod
     public void startUpdates() {
-        // Milliseconds to Microseconds conversion
         sensorManager.registerListener(this, this.sensor, this.interval);
     }
 
@@ -95,8 +94,6 @@ public class Light extends ReactContextBaseJavaModule implements SensorEventList
         }
 
         map.putDouble("light", event.values[0]);
-
-        map.putDouble("timestamp", event.timestamp);
         sendEvent("Light", map);
 
     }

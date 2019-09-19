@@ -98,7 +98,6 @@ public class Accelerometer extends ReactContextBaseJavaModule implements SensorE
         map.putDouble("x", event.values[0]);
         map.putDouble("y", event.values[1]);
         map.putDouble("z", event.values[2]);
-        map.putDouble("timestamp", event.timestamp);
         sendEvent("Accelerometer", map);
 
     }

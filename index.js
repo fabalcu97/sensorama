@@ -22,28 +22,7 @@ function genExports(sensor) {
   };
 }
 
-export let Gyroscope = {
-  isAvailable: GyroscopeSensor.isAvailable,
-  getData: GyroscopeSensor.getData,
-  setUpdateInterval: GyroscopeSensor.setUpdateInterval,
-  startUpdates: GyroscopeSensor.startUpdates,
-  stopUpdates: GyroscopeSensor.stopUpdates
-};
-
-export let Proximity = {
-  isAvailable: ProximitySensor.isAvailable,
-  getData: ProximitySensor.getData,
-  setUpdateInterval: ProximitySensor.setUpdateInterval,
-  startUpdates: ProximitySensor.startUpdates,
-  stopUpdates: ProximitySensor.stopUpdates
-};
-
-export let Accelerometer = {
-  isAvailable: AccelerometerSensor.isAvailable,
-  getData: AccelerometerSensor.getData,
-  setUpdateInterval: AccelerometerSensor.setUpdateInterval,
-  startUpdates: AccelerometerSensor.startUpdates,
-  stopUpdates: AccelerometerSensor.stopUpdates
-};
-
+export let Gyroscope = genExports(GyroscopeSensor);
+export let Accelerometer = genExports(AccelerometerSensor);
+export let Proximity = genExports(ProximitySensor);
 export let Light = genExports(LightSensor);
