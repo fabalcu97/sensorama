@@ -20,7 +20,7 @@ public class Accelerometer extends ReactContextBaseJavaModule implements SensorE
     private final ReactApplicationContext reactContext;
     private final SensorManager sensorManager;
     private final Sensor sensor;
-    private int interval;
+    private int interval = SensorManager.SENSOR_DELAY_NORMAL;
 
 
     public Accelerometer(ReactApplicationContext reactContext) {
@@ -67,7 +67,7 @@ public class Accelerometer extends ReactContextBaseJavaModule implements SensorE
     @ReactMethod
     public void startUpdates() {
         // Milliseconds to Microseconds conversion
-        sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, this.sensor, this.interval);
     }
 
     @ReactMethod
@@ -107,6 +107,4 @@ public class Accelerometer extends ReactContextBaseJavaModule implements SensorE
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
-
-
 }

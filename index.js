@@ -4,22 +4,22 @@ const {
   ListSensors,
   Gyroscope: GyroscopeSensor,
   Proximity: ProximitySensor,
-  Accelerometer: AccelerometerSensor
+  Accelerometer: AccelerometerSensor,
+  Light: LightSensor
 } = NativeModules;
-
-if (
-  !GyroscopeSensor &&
-  !ListSensors &&
-  !ProximitySensor &&
-  !AccelerometerSensor
-) {
-  throw new Error(
-    "Native modules for sensors not available. Did react-native link run successfully?"
-  );
-}
 
 export function getSensorList() {
   return ListSensors.getSensorList();
+}
+
+function genExports(sensor) {
+  return {
+    isAvailable: sensor.isAvailable,
+    getData: sensor.getData,
+    setUpdateInterval: sensor.setUpdateInterval,
+    startUpdates: sensor.startUpdates,
+    stopUpdates: sensor.stopUpdates
+  };
 }
 
 export let Gyroscope = {
@@ -45,3 +45,5 @@ export let Accelerometer = {
   startUpdates: AccelerometerSensor.startUpdates,
   stopUpdates: AccelerometerSensor.stopUpdates
 };
+
+export let Light = genExports(LightSensor);

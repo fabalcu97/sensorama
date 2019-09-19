@@ -36,11 +36,7 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
     // RN Methods
     @ReactMethod
     public void isAvailable(Promise promise) {
-        if (this.sensor == null) {
-            promise.reject(new RuntimeException("No Gyroscope found"));
-            return;
-        }
-        promise.resolve("Gyroscope available!");
+        promise.resolve(this.sensor != null);
     }
 
     @ReactMethod
