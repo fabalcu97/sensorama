@@ -19,6 +19,7 @@ public class RNSensoramaPackage implements ReactPackage {
 
         modules.add(new ListSensors(reactContext));
         modules.add(new Gyroscope(reactContext));
+        modules.add(new Proximity(reactContext));
 
         return modules;
     }
