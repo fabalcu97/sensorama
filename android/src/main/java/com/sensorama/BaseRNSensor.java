@@ -6,41 +6,42 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-public class Proximity extends ReactContextBaseJavaModule implements SensorEventListener {
+public abstract class BaseRNSensor extends ReactContextBaseJavaModule implements SensorEventListener {
 
     private final ReactApplicationContext reactContext;
     private final SensorManager sensorManager;
     private final Sensor sensor;
-    private double lastReading = (double) System.currentTimeMillis();
     private int interval;
 
-    public Proximity(ReactApplicationContext reactContext) {
+    public BaseRNSensor(ReactApplicationContext reactContext) {
         super(reactContext);
-        Log.d("Proximity", "Constructor");
         this.reactContext = reactContext;
-        this.sensorManager = (SensorManager) reactContext.getSystemService(reactContext.SENSOR_SERVICE);
-        this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        this.sensorManager = (SensorManager) reactContext.getSystemService(
+                ReactApplicationContext.SENSOR_SERVICE
+        );
+        this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
     }
 
     // RN Methods
+
     @ReactMethod
     public void isAvailable(Promise promise) {
         promise.resolve(this.sensor != null);
     }
 
-
     @ReactMethod
     public void getData(Promise promise) {
         if (this.sensor == null) {
-            promise.reject(new RuntimeException("No proximity sensor found"));
+            promise.reject(new RuntimeException("No Gyroscope found"));
             return;
         }
         WritableMap map = Arguments.createMap();
@@ -59,17 +60,13 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
 
     @ReactMethod
     public void startUpdates() {
+        // Milliseconds to Microseconds conversion
         sensorManager.registerListener(this, sensor, this.interval * 1000);
     }
 
     @ReactMethod
     public void stopUpdates() {
         sensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public String getName() {
-        return "Proximity";
     }
 
     // SensorEventListener Interface
@@ -82,24 +79,4 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
         }
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        Log.d("Proximity", "onSensorChanged");
-        double tempMs = (double) System.currentTimeMillis();
-        if (tempMs - lastReading >= interval) {
-            lastReading = tempMs;
-
-            Sensor mySensor = sensorEvent.sensor;
-            WritableMap map = Arguments.createMap();
-
-            if (mySensor.getType() == Sensor.TYPE_PROXIMITY) {
-                map.putDouble("distance", sensorEvent.values[0]);
-                sendEvent("Proximity", map);
-            }
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-    }
 }

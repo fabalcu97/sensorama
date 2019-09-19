@@ -1,19 +1,18 @@
 package com.sensorama;
 
-import android.os.Bundle;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.annotation.Nullable;
 import android.util.Log;
-import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class Gyroscope extends ReactContextBaseJavaModule implements SensorEventListener {
@@ -23,24 +22,21 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
     private final Sensor sensor;
     private double lastReading = (double) System.currentTimeMillis();
     private int interval;
-    private Arguments arguments;
 
     public Gyroscope(ReactApplicationContext reactContext) {
         super(reactContext);
         Log.d("Gyroscope", "Constructor");
         this.reactContext = reactContext;
-        this.sensorManager = (SensorManager) reactContext.getSystemService(reactContext.SENSOR_SERVICE);
+        this.sensorManager = (SensorManager) reactContext.getSystemService(
+                ReactApplicationContext.SENSOR_SERVICE
+        );
         this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
     }
 
     // RN Methods
     @ReactMethod
     public void isAvailable(Promise promise) {
-        if (this.sensor == null) {
-            promise.reject(new RuntimeException("No Gyroscope found"));
-            return;
-        }
-        promise.resolve("Gyroscope available!");
+        promise.resolve(this.sensor != null);
     }
 
     @ReactMethod
@@ -65,7 +61,7 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
 
     @ReactMethod
     public void startUpdates() {
-        // Milisecond to Mikrosecond conversion
+        // Milliseconds to Microseconds conversion
         sensorManager.registerListener(this, sensor, this.interval * 1000);
     }
 
@@ -97,7 +93,7 @@ public class Gyroscope extends ReactContextBaseJavaModule implements SensorEvent
             lastReading = tempMs;
 
             Sensor mySensor = sensorEvent.sensor;
-            WritableMap map = arguments.createMap();
+            WritableMap map = Arguments.createMap();
 
             if (mySensor.getType() == Sensor.TYPE_GYROSCOPE) {
                 map.putDouble("x", sensorEvent.values[0]);

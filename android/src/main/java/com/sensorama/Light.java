@@ -6,31 +6,37 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.Promise;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-public class Proximity extends ReactContextBaseJavaModule implements SensorEventListener {
+public class Light extends ReactContextBaseJavaModule implements SensorEventListener {
 
     private final ReactApplicationContext reactContext;
     private final SensorManager sensorManager;
     private final Sensor sensor;
-    private double lastReading = (double) System.currentTimeMillis();
-    private int interval;
+    private int interval = SensorManager.SENSOR_DELAY_NORMAL;
 
-    public Proximity(ReactApplicationContext reactContext) {
+
+    public Light(ReactApplicationContext reactContext) {
         super(reactContext);
-        Log.d("Proximity", "Constructor");
         this.reactContext = reactContext;
-        this.sensorManager = (SensorManager) reactContext.getSystemService(reactContext.SENSOR_SERVICE);
-        this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        this.sensorManager = (SensorManager) reactContext.getSystemService(
+                ReactApplicationContext.SENSOR_SERVICE
+        );
+        this.sensor = this.sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
     }
 
-    // RN Methods
+    @Override
+    public String getName() {
+        return "Light";
+    }
+
     @ReactMethod
     public void isAvailable(Promise promise) {
         promise.resolve(this.sensor != null);
@@ -40,7 +46,7 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
     @ReactMethod
     public void getData(Promise promise) {
         if (this.sensor == null) {
-            promise.reject(new RuntimeException("No proximity sensor found"));
+            promise.reject(new RuntimeException("No light sensor found"));
             return;
         }
         WritableMap map = Arguments.createMap();
@@ -52,6 +58,7 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
         promise.resolve(map);
     }
 
+
     @ReactMethod
     public void setUpdateInterval(int newInterval) {
         this.interval = newInterval;
@@ -59,7 +66,7 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
 
     @ReactMethod
     public void startUpdates() {
-        sensorManager.registerListener(this, sensor, this.interval * 1000);
+        sensorManager.registerListener(this, this.sensor, this.interval);
     }
 
     @ReactMethod
@@ -67,12 +74,6 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
         sensorManager.unregisterListener(this);
     }
 
-    @Override
-    public String getName() {
-        return "Proximity";
-    }
-
-    // SensorEventListener Interface
     private void sendEvent(String eventName, @Nullable WritableMap params) {
         try {
             this.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit(eventName, params);
@@ -82,24 +83,23 @@ public class Proximity extends ReactContextBaseJavaModule implements SensorEvent
         }
     }
 
+
     @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        Log.d("Proximity", "onSensorChanged");
-        double tempMs = (double) System.currentTimeMillis();
-        if (tempMs - lastReading >= interval) {
-            lastReading = tempMs;
+    public void onSensorChanged(SensorEvent event) {
+        Sensor mySensor = event.sensor;
 
-            Sensor mySensor = sensorEvent.sensor;
-            WritableMap map = Arguments.createMap();
-
-            if (mySensor.getType() == Sensor.TYPE_PROXIMITY) {
-                map.putDouble("distance", sensorEvent.values[0]);
-                sendEvent("Proximity", map);
-            }
+        WritableMap map = Arguments.createMap();
+        if (mySensor.getType() != Sensor.TYPE_LIGHT) {
+            return;
         }
+
+        map.putDouble("light", event.values[0]);
+        sendEvent("Light", map);
+
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }

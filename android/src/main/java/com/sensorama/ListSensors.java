@@ -22,10 +22,15 @@ public class ListSensors extends ReactContextBaseJavaModule {
 
     public ListSensors(ReactApplicationContext reactContext) {
         super(reactContext);
-        sensorManager = (SensorManager) reactContext.getSystemService(
+        this.sensorManager = (SensorManager) reactContext.getSystemService(
                 ReactApplicationContext.SENSOR_SERVICE
         );
 
+    }
+
+    @Override
+    public String getName() {
+        return "ListSensors";
     }
 
     public WritableMap getSensorAttrs(Sensor sensor) {
@@ -60,22 +65,18 @@ public class ListSensors extends ReactContextBaseJavaModule {
 
         if (Build.VERSION.SDK_INT >= 26) {
             map.putInt("highestDirectReportRateLevel", sensor.getHighestDirectReportRateLevel());
-//            map.putBoolean("isDirectChannelTypeSupported", sensor.isDirectChannelTypeSupported());
+            // TODO add support for isDirectionalChannelTypeSupported
         }
 
         return map;
 
     }
 
-    @Override
-    public String getName() {
-        return "ListSensors";
-    }
 
     @ReactMethod
     public void getSensorList(Promise promise) {
         try {
-            List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+            List<Sensor> sensors = this.sensorManager.getSensorList(Sensor.TYPE_ALL);
             WritableArray array = Arguments.createArray();
             for (Sensor sensor : sensors) {
                 array.pushMap(getSensorAttrs(sensor));

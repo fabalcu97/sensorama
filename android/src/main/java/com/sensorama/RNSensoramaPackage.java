@@ -18,8 +18,10 @@ public class RNSensoramaPackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
 
         modules.add(new ListSensors(reactContext));
+        modules.add(new Accelerometer(reactContext));
         modules.add(new Gyroscope(reactContext));
         modules.add(new Proximity(reactContext));
+        modules.add(new Light(reactContext));
 
         return modules;
     }
